@@ -3,10 +3,11 @@ import re
 from datetime import datetime
 
 from dotenv import load_dotenv
-from models import Announcement, Base, ReadReceipt, SessionLocal, Target, engine
-from scheduler import schedule_user_reminder, scheduler
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+
+from .models import Announcement, Base, ReadReceipt, SessionLocal, Target, engine
+from .scheduler import schedule_user_reminder, scheduler
 
 # Load environment variables
 load_dotenv()

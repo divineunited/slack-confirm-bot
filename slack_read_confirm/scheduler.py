@@ -4,8 +4,9 @@ import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from models import Announcement, ReadReceipt, SessionLocal, Target
 from slack_bolt import App
+
+from .models import Announcement, ReadReceipt, SessionLocal, Target
 
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 scheduler = BackgroundScheduler()
