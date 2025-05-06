@@ -118,21 +118,39 @@ def handle_reaction_added(event, client, logger):
 
 # Mention handler
 @app.event("app_mention")
-def handle_app_mention(event, say):
+def handle_app_mention(event, say, client, logger):
     user = event.get("user")
     text = event.get("text")
-    # TODO: parse mention for read-confirm
-    say(f"Hey <@{user}>, I got your message: '{text}'")
-
-# Reaction added handler
-@app.event("reaction_added")
-def handle_reaction_added(event, client):
-    reaction = event["reaction"]
-    if reaction == "white_check_mark":  # or 'heavy_check_mark'
-        user = event["user"]
-        item = event["item"]
-        # TODO: mark as read in DB, cancel scheduler job
-        # TODO: notify owner if everyone has read
+    channel_id = event.get("channel")
+    
+    # Check if the mention includes "read-confirm" command
+    if "read-confirm" in text.lower():
+        # Extract message text (everything after "read-confirm")
+        parts = text.lower().split("read-confirm", 1)
+        if len(parts) > 1:
+            message_text = parts[1].strip()
+            if message_text:
+                # Post the announcement
+                post = client.chat_postMessage(channel=channel_id, text=message_text)
+                message_ts = post["ts"]
+                
+                # Save announcement with the mentioning user as owner
+                db = SessionLocal()
+                ann = Announcement(owner_id=user, channel_id=channel_id,
+                                message_ts=message_ts, text=message_text)
+                db.add(ann)
+                db.commit()
+                db.refresh(ann)
+                db.close()
+                
+                say(f"<@{user}>, I've created your read-confirm announcement. Users can confirm by adding a ✅ reaction.")
+                return
+        
+        # If we get here, the command wasn't properly formatted
+        say(f"<@{user}>, to create a read-confirm announcement, mention me with 'read-confirm' followed by your message.")
+    else:
+        # Default response for other mentions
+        say(f"Hey <@{user}>! Use me to create read-confirm announcements. Just mention me with 'read-confirm' followed by your message.")
 
 # Start the scheduler
 scheduler.start()
