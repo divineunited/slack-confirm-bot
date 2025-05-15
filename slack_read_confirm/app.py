@@ -57,8 +57,7 @@ def handle_read_confirm_command(ack, body, client, logger):
 
     # Save announcement
     db = SessionLocal()
-    ann = Announcement(owner_id=owner_id, channel_id=channel_id,
-                       message_ts=message_ts, text=clean_text)
+    ann = Announcement(owner_id=owner_id, channel_id=channel_id, message_ts=message_ts, text=clean_text)
     db.add(ann)
     db.commit()
     db.refresh(ann)
@@ -101,6 +100,7 @@ def handle_reaction_added(event, client, logger):
                     db.add(receipt)
                     db.commit()
                 # Cancel scheduled job
+                # TODO: check if this only removes for that user.
                 job_id = f"reminder_{ann.id}_{tgt.id}"
                 try:
                     scheduler.remove_job(job_id)
@@ -137,8 +137,7 @@ def handle_app_mention(event, say, client, logger):
                 
                 # Save announcement with the mentioning user as owner
                 db = SessionLocal()
-                ann = Announcement(owner_id=user, channel_id=channel_id,
-                                message_ts=message_ts, text=message_text)
+                ann = Announcement(owner_id=user, channel_id=channel_id, message_ts=message_ts, text=message_text)
                 db.add(ann)
                 db.commit()
                 db.refresh(ann)
