@@ -3,17 +3,16 @@ import re
 from datetime import datetime
 
 from dotenv import load_dotenv
-from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 from .models import Announcement, Base, ReadReceipt, SessionLocal, Target, engine
-from .scheduler import schedule_user_reminder, scheduler
+from .scheduler import get_app, schedule_user_reminder, scheduler
 
 # Load environment variables
 load_dotenv()
 
 # Initialize Slack Bolt app
-app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+app = get_app()
 # Create DB tables
 Base.metadata.create_all(bind=engine)
 

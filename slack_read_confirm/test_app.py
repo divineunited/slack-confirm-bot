@@ -103,11 +103,13 @@ class TestSlackReadConfirm(unittest.TestCase):
         self.assertIsNotNone(saved_receipt)
         self.assertEqual(saved_receipt.target_id, tgt.id)
         
-    @patch('slack_read_confirm.scheduler.app')
-    def test_scheduler(self, mock_app):
+    @patch('slack_read_confirm.scheduler.get_app')
+    def test_scheduler(self, mock_get_app):
         # Mock the Slack client
+        mock_app = MagicMock()
         mock_client = MagicMock()
         mock_app.client = mock_client
+        mock_get_app.return_value = mock_app
         
         # Create test announcement
         ann = Announcement(

@@ -8,8 +8,24 @@ from slack_bolt import App
 
 from .models import Announcement, ReadReceipt, SessionLocal, Target
 
-app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+# Initialize scheduler
 scheduler = BackgroundScheduler()
+
+# Lazy-loaded Slack app
+_app = None
+
+def get_app():
+    """Get or initialize the Slack app"""
+    global _app
+    if _app is None:
+        token = os.environ.get("SLACK_BOT_TOKEN")
+        if token:
+            _app = App(token=token)
+        else:
+            # For testing purposes
+            from unittest.mock import MagicMock
+            _app = MagicMock()
+    return _app
 
 def schedule_user_reminder(announcement_id: int, target_id: int, user_id: str):
     job_id = f"reminder_{announcement_id}_{target_id}"
@@ -29,5 +45,5 @@ def send_reminder(announcement_id: int, target_id: int, user_id: str):
             text = (f"Reminder: Please confirm you've read the announcement in {channel_link}.\n"
                    f"Message: '{announcement.text}'\n"
                    f"Please add a ✅ reaction to the original message to confirm you've read it.")
-            app.client.chat_postMessage(channel=user_id, text=text)
+            get_app().client.chat_postMessage(channel=user_id, text=text)
     db.close()
